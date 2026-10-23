@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Prep - AML | AJP | Web Development</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  header .title h1 { font-size: 1.8rem; margin-bottom: 5px; }
+  header .title p { opacity: 0.9; font-size: 0.95rem; }
+  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .mode-toggle {
+    display: flex;
+    gap: 5px;
+    background: rgba(255,255,255,0.15);
+    padding: 4px;
+    border-radius: 25px;
+  }
+  .mode-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  .mode-btn.active { background: #fff; color: #2a5298; }
+  .admin-badge {
+    background: #27ae60;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+  .admin-badge.show { display: flex; }
+  .logout-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: none;
+  }
+  .logout-btn.show { display: block; }
+  .controls {
+    padding: 20px;
+    background: #f7f9fc;
+    border-bottom: 1px solid #e1e5eb;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+  }
+  .search-box:focus { border-color: #667eea; }
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+  .btn-pdf { background: #e74c3c; color: #fff; }
+  .btn-export { background: #3498db; color: #fff; }
+  .btn-import { background: #9b59b6; color: #fff; }
+  .tabs { display: flex; background: #fff; border-bottom: 2px solid #eee; }
+  .tab {
+    flex: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+  }
+  .tab:hover { background: #f7f9fc; }
+  .tab.active { color: #2a5298; border-bottom-color: #2a5298; background: #f0f4ff; }
+  .units-bar { display: flex; gap: 8px; padding: 15px 20px; background: #f0f4ff; flex-wrap: wrap; }
+  .unit-btn {
+    padding: 8px 18px;
+    border: 2px solid #667eea;
+    background: #fff;
+    color: #667eea;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .unit-btn.active, .unit-btn:hover { background: #667eea; color: #fff; }
+  .marks-filter {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+  }
+  .marks-btn {
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .marks-btn.active { background: #764ba2; color: #fff; border-color: #764ba2; }
+  .content { padding: 20px; }
+  .question-card {
+    background: #fff;
+    border: 1px solid #e1e5eb;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+  .question-header {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fafbfc;
+    gap: 10px;
+  }
+  .question-header:hover { background: #f0f4ff; }
+  .q-title { flex: 1; font-weight: 600; color: #2a5298; }
+  .q-marks {
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .q-marks.m2 { background: #27ae60; }
+  .q-marks.m5 { background: #f39c12; }
+  .q-marks.m10 { background: #e74c3c; }
+  .arrow { transition: transform 0.3s; font-size: 1.2rem; color: #667eea; }
+  .question-card.open .arrow { transform: rotate(180deg); }
+  .answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .question-card.open .answer {
+    max-height: 5000px;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+  }
+  .answer p { margin-bottom: 10px; line-height: 1.6; }
+  .answer ul, .answer ol { margin: 10px 0 10px 20px; }
+  .answer li { margin-bottom: 5px; line-height: 1.5; }
+  .diagram {
+    margin: 15px auto;
+    text-align: center;
+    background: #f7f9fc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px dashed #667eea;
+  }
+  .diagram img { max-width: 100%; height: auto; border-radius: 6px; }
+  .diagram-caption { font-size: 0.85rem; color: #666; margin-top: 8px; font-style: italic; }
+  .empty { text-align: center; padding: 40px; color: #888; font-style: italic; }
+  footer {
+    text-align: center;
+    padding: 20px;
+    background: #f7f9fc;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  /* ========== ADMIN PANEL ========== */
+  .admin-panel {
+    padding: 25px;
+    background: #fffbea;
+    border-bottom: 2px solid #f0d97a;
+  }
+  .admin-panel h2 {
+    color: #b8860b;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-grid label {
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .form-grid input,
+  .form-grid select,
+  .form-grid textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+  }
+  .form-grid textarea { min-height: 100px; resize: vertical; }
+  .form-grid input:focus,
+  .form-grid select:focus,
+  .form-grid textarea:focus { border-color: #f39c12; outline: none; }
+  .form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .btn-save { background: #27ae60; color: #fff; }
+  .btn-clear { background: #95a5a6; color: #fff; }
+  .hint {
+    background: #e8f4fd;
+    border-left: 4px solid #3498db;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+  .hint code { background: #fff; padding: 1px 5px; border-radius: 3px; color: #c0392b; }
+
+  /* ========== EASY IMPORT SECTION ========== */
+  .import-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: 2px solid #81c784;
+    border-radius: 12px;
+  }
+  .import-section h3 {
+    color: #2e7d32;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .import-tabs {
+    display: flex;
+    gap: 5px;
+    background: #fff;
+    padding: 5px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  .import-tab {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 15px;
+    border: none;
+    background: transparent;
+    color: #666;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  .import-tab.active {
+    background: #2e7d32;
+    color: #fff;
+  }
+  .import-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #c8e6c9;
+  }
+  .import-content h4 {
+    color: #2e7d32;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+  }
+  .import-content .info-box {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 12px 15px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    color: #856404;
+    margin-bottom: 15px;
+    line-height: 1.6;
+  }
+  .import-content .info-box b { color: #856404; }
+  .import-content textarea {
+    width: 100%;
+    min-height: 250px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .import-content textarea:focus { border-color: #2e7d32; outline: none; }
+  .import-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+  .btn-import-now { background: #2e7d32; color: #fff; }
+  .btn-download-tpl { background: #1976d2; color: #fff; }
+  .btn-preview { background: #ff9800; color: #fff; }
+  .preview-box {
+    margin-top: 15px;
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+  }
+  .preview-box.show { display: block; }
+  .preview-item {
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 4px solid #2e7d32;
+  }
+  .preview-item strong { color: #2e7d32; }
+  .preview-item small { color: #888; display: block; margin-top: 3px; }
+
+  /* ========== STEP-BY-STEP EDITOR ========== */
+  .editor-section {
+    margin-top: 25px;
+    border-top: 2px dashed #f0d97a;
+    padding-top: 20px;
+  }
+  .editor-section h3 {
+    color: #b8860b;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 1px solid #f0d97a;
+    position: relative;
+  }
+  .progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: #eee;
+    z-index: 0;
+  }
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    z-index: 1;
+    flex: 1;
+  }
+  .step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #eee;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+  }
+  .step-item.active .step-circle { background: #f39c12; color: #fff; transform: scale(1.1); }
+  .step-item.done .step-circle { background: #27ae60; color: #fff; }
+  .step-label { font-size: 0.8rem; color: #888; font-weight: 600; text-align: center; }
+  .step-item.active .step-label { color: #f39c12; }
+  .step-item.done .step-label { color: #27ae60; }
+  .selection-panel {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #f0d97a;
+  }
+  .selection-panel h4 {
+    color: #2a5298;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .select-card {
+    background: #f7f9fc;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 18px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    color: #333;
+  }
+  .select-card:hover {
+    border-color: #f39c12;
+    background: #fff9e6;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(243,156,18,0.2);
+  }
+  .select-card .card-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+  .select-card .card-title { font-size: 1rem; color: #2a5298; }
+  .select-card .card-count { font-size: 0.8rem; color: #888; margin-top: 4px; font-weight: normal; }
+  .selection-breadcrumb {
+    background: #f0f4ff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .breadcrumb-item {
+    background: #667eea;
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .breadcrumb-sep { color: #999; }
+  .editor-actions { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+  .btn-back { background: #95a5a6; color: #fff; }
+  .btn-reset { background: #e67e22; color: #fff; }
+  .editor-q-list { margin-top: 15px; }
+  .editor-q-item {
+    background: #fff;
+    border: 1px solid #f0d97a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .editor-q-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .editor-q-info { flex: 1; min-width: 200px; }
+  .editor-q-info .q-text { font-weight: 600; color: #2a5298; margin-bottom: 5px; }
+  .editor-q-info .a-preview { font-size: 0.85rem; color: #666; line-height: 1.4; }
+  .editor-q-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: transform 0.2s;
+  }
+  .btn-sm:hover { transform: translateY(-2px); }
+  .btn-edit { background: #f39c12; color: #fff; }
+  .btn-del { background: #e74c3c; color: #fff; }
+  .no-questions {
+    text-align: center;
+    padding: 30px;
+    color: #888;
+    background: #f7f9fc;
+    border-radius: 8px;
+    font-style: italic;
+  }
+
+  /* ========== SETTINGS SECTION ========== */
+  .settings-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e1e5eb;
+  }
+  .settings-section h3 { color: #2a5298; margin-bottom: 15px; font-size: 1.1rem; }
+  .settings-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .settings-row .field { flex: 1; min-width: 180px; }
+  .settings-row label {
+    display: block;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+  .settings-row input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+  .btn-change-pass { background: #8e44ad; color: #fff; }
+
+  /* ========== LOGIN MODAL ========== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal h2 { color: #2a5298; margin-bottom: 8px; text-align: center; }
+  .modal .subtitle { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+  .modal label { display: block; font-weight: 600; color: #555; margin-bottom: 6px; font-size: 0.9rem; }
+  .modal input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    outline: none;
+  }
+  .modal input:focus { border-color: #667eea; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 10px; }
+  .modal-actions .btn { flex: 1; }
+  .btn-login { background: #2a5298; color: #fff; }
+  .btn-cancel { background: #95a5a6; color: #fff; }
+  .error-msg {
+    background: #fee;
+    color: #c0392b;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: none;
+    border-left: 4px solid #c0392b;
+  }
+  .error-msg.show { display: block; }
+  .default-pass-hint {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #856404;
+    margin-bottom: 15px;
+  }
+
+  /* ========== NEW: PDF FEATURES ========== */
+  .pdf-item {
+    background: #fff;
+    border: 1px solid #c8e6c9;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pdf-info { flex: 1; }
+  .pdf-info h4 { color: #2e7d32; margin-bottom: 4px; font-size: 1rem; }
+  .pdf-info small { color: #666; }
+  .pdf-actions { display: flex; gap: 8px; }
+  .btn-view-pdf { background: #16a085; color: #fff; }
+  .btn-download-pdf { background: #2980b9; color: #fff; }
+  .btn-delete-pdf { background: #e74c3c; color: #fff; }
+
+  .pdf-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 20px;
+  }
+  .pdf-modal-overlay.show { display: flex; }
+  .pdf-modal-content {
+    background: #fff;
+    width: 95%;
+    max-width: 1000px;
+    height: 90vh;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .pdf-modal-header {
+    padding: 15px 20px;
+    background: #16a085;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pdf-modal-header h3 { margin: 0; font-size: 1.1rem; }
+  .pdf-modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .pdf-modal-close:hover { background: rgba(255,255,255,0.3); }
+  .pdf-modal-body {
+    flex: 1;
+    background: #525659;
+    position: relative;
+  }
+  .pdf-modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    header { flex-direction: column; text-align: center; }
+    .header-right { justify-content: center; }
+    .step-label { font-size: 0.7rem; }
+    .step-circle { width: 34px; height: 34px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="title">
+      <h1>📚 Exam Preparation Portal</h1>
+      <p>AML • AJP • Web Development | 2 / 5 / 10 Marks Questions</p>
+    </div>
+    <div class="header-right">
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="study">📖 Study</button>
+        <button class="mode-btn" data-mode="admin">⚙️ Admin</button>
+      </div>
+      <div class="admin-badge" id="adminBadge">🔓 Admin</div>
+      <button class="logout-btn" id="logoutBtn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </header>
+
+  <!-- ============ ADMIN PANEL ============ -->
+  <div class="admin-panel" id="adminPanel" style="display:none;">
+    <h2>⚙️ Admin Dashboard</h2>
+
+    <!-- ============ 🌟 EASY IMPORT SECTION ============ -->
+    <div class="import-section">
+      <h3>🌟 Easy Import Questions (No HTML Needed!)</h3>
+
+      <div class="import-tabs">
+        <button class="import-tab active" data-import="simple">📝 Simple Text</button>
+        <button class="import-tab" data-import="bulk">📋 Bulk Paste</button>
+        <button class="import-tab" data-import="csv">📊 CSV/Excel</button>
+      </div>
+
+      <!-- METHOD 1: Simple Text -->
+      <div class="import-content" id="import-simple">
+        <h4>📝 Method 1: Simple Text Format</h4>
+        <div class="info-box">
+          ✨ <b>Super Easy!</b> Just type each question and answer. The system will auto-format everything!<br>
+          <b>Rules:</b><br>
+          • <b>Q:</b> at start = Question<br>
+          • <b>A:</b> at start = Answer<br>
+          • Empty line = new paragraph<br>
+          • Line starting with <code>-</code> or <code>*</code> = bullet point<br>
+          • Line starting with <code>1.</code> <code>2.</code> = numbered list<br>
+          • <code>**text**</code> = <b>bold</b><br>
+          • <b>---</b> on its own line = separator between questions
+        </div>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div>
+            <label>Subject</label>
+            <select id="impSubject">
+              <option value="AML">AML</option>
+              <option value="AJP">AJP</option>
+              <option value="WebDev">Web Development</option>
+            </select>
+          </div>
+          <div>
+            <label>Unit</label>
+            <select id="impUnit">
+              <option value="1">Unit 1</option>
+              <option value="2">Unit 2</option>
+              <option value="3">Unit 3</option>
+              <option value="4">Unit 4</option>
+              <option value="5">Unit 5</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks</label>
+            <select id="impMarks">
+              <option value="2">2 Marks</option>
+              <option value="5">5 Marks</option>
+              <option value="10">10 Marks</option>
+            </select>
+          </div>
+        </div>
+        <label style="font-weight:600;color:#555;font-size:0.9rem;margin-bottom:4px;display:block;">Paste your questions below:</label>
+        <textarea id="simpleText" placeholder="Q: Define Artificial Intelligence.
+A: AI is the branch of computer science that creates machines capable of human-like intelligence.
+
+---
+
+Q: List features of Java.
+A: Java has many features:
+- Simple
+- Object-Oriented
+- Platform-Independent
+- Secure
+- **Robust** and Multithreaded
+
+---
+
+Q: Explain the steps of software development.
+A: Software development has these steps:
+1. Requirement Analysis
+2. Design
+3. Coding
+4. Testing
+5. Deployment"></textarea>
+        <div class="import-actions">
+          <button class="btn btn-preview" onclick="previewSimple()">👁️ Preview</button>
+          <button class="btn btn-import-now" onclick="importSimple()">✅ Import Questions</button>
+          <button class="btn btn-download-tpl" onclick="downloadSimpleTemplate()">📥 Download Template</button>
+        </div>
+        <div class="preview-box" id="previewSimple"></div>
+      </div>
+
+      <!-- METHOD 2: Bulk Paste -->
+      <div class="import-content" id="import-bulk" style="display:none;">
+        <h4>📋 Method 2: Bulk Paste (One Question Per Line)</h4>
+        <div class="info-box">
+          ✨ <b>Fastest method!</b> Just paste questions (one per line), then write answers below.<br>
+          Format: Each line is one question. Then type answers in the same order.
+        </div>
+        <div class="form-grid" style="margin-bottom:10px;">
+          <div>
+            <label>Subject</label>
+            <select id="bulkSubject">
+              <option value="AML">AML</option>
+              <option value="AJP">AJP</option>
+              <option value="WebDev">Web Development</option>
+            </select>
+          </div>
+          <div>
+            <label>Unit</label>
+            <select id="bulkUnit">
+              <option value="1">Unit 1</option>
+              <option value="2">Unit 2</option>
+              <option value="3">Unit 3</option>
+              <option value="4">Unit 4</option>
+              <option value="5">Unit 5</option>
+            </select>
+          </div>
+          <div>
+            <label>Marks</label>
+            <select id="bulkMarks">
+              <option value="2">2 Marks</option>
+              <option value="5">5 Marks</option>
+              <option value="10">10 Marks</option>
+            </select>
+          </div>
+        </div>
+        <label style="font-weight:600;color:#555;font-size:0.9rem;margin-bottom:4px;display:block;">Questions (one per line):</label>
+        <textarea id="bulkQuestions" style="min-height:120px;" placeholder="Define AI.
+What is Java?
+Explain HTML.
+What is CSS?
+Define JavaScript."></textarea>
+        <label style="font-weight:600;color:#555;font-size:0.9rem;margin:10px 0 4px;display:block;">Answers (one per line, same order):</label>
+        <textarea id="bulkAnswers" style="min-height:120px;" placeholder="AI is artificial intelligence that mimics human thinking.
+Java is a platform-independent programming language.
+HTML is the markup language for web pages.
+CSS is used to style HTML elements.
+JavaScript makes web pages interactive."></textarea>
+        <div class="import-actions">
+          <button class="btn btn-import-now" onclick="importBulk()">✅ Import All</button>
+          <button class="btn btn-download-tpl" onclick="downloadBulkTemplate()">📥 Download Template</button>
+        </div>
+      </div>
+
+      <!-- METHOD 3: CSV/Excel -->
+      <div class="import-content" id="import-csv" style="display:none;">
+        <h4>📊 Method 3: CSV / Excel File</h4>
+        <div class="info-box">
+          ✨ <b>Best for many questions!</b><br>
+          1. Click <b>📥 Download Template</b> to get a CSV file<br>
+          2. Open in Excel / Google Sheets / Notepad<br>
+          3. Fill in your questions and answers<br>
+          4. Save as CSV and upload below
+        </div>
+        <label style="font-weight:600;color:#555;font-size:0.9rem;margin-bottom:4px;display:block;">Upload CSV file:</label>
+        <input type="file" id="csvFile" accept=".csv" style="padding:10px;border:2px solid #ddd;border-radius:6px;width:100%;">
+        <div class="import-actions">
+          <button class="btn btn-download-tpl" onclick="downloadCSVTemplate()">📥 Download CSV Template</button>
+          <button class="btn btn-import-now" onclick="importCSV()">✅ Import from CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Question Form -->
+    <div style="margin-top:25px;">
+      <h3 style="color:#b8860b;margin-bottom:15px;">➕ Add Single Question</h3>
+      <div class="hint">
+        💡 <b>Tip:</b> Use the Easy Import above for multiple questions! For single question, use form below.
+        Answer auto-formats: empty line = paragraph, <code>-</code> = bullet, <code>**text**</code> = bold.
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>Subject</label>
+          <select id="fSubject">
+            <option value="AML">AML</option>
+            <option value="AJP">AJP</option>
+            <option value="WebDev">Web Development</option>
+          </select>
+        </div>
+        <div>
+          <label>Unit (1-5)</label>
+          <select id="fUnit">
+            <option value="1">Unit 1</option>
+            <option value="2">Unit 2</option>
+            <option value="3">Unit 3</option>
+            <option value="4">Unit 4</option>
+            <option value="5">Unit 5</option>
+          </select>
+        </div>
+        <div>
+          <label>Marks</label>
+          <select id="fMarks">
+            <option value="2">2 Marks</option>
+            <option value="5">5 Marks</option>
+            <option value="10">10 Marks</option>
+          </select>
+        </div>
+        <div>
+          <label>Image URL (optional)</label>
+          <input type="text" id="fImage" placeholder="https://example.com/diagram.png">
+        </div>
+        <div class="full">
+          <label>Question</label>
+          <input type="text" id="fQuestion" placeholder="e.g., Define Artificial Intelligence.">
+        </div>
+        <div class="full">
+          <label>Answer (Plain text - auto-formats!)</label>
+          <textarea id="fAnswer" placeholder="Type answer in plain text. Empty lines become paragraphs. Lines starting with - become bullets. **text** becomes bold."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-save" onclick="saveQuestion()">💾 Save Question</button>
+        <button class="btn btn-clear" onclick="clearForm()">🔄 Clear Form</button>
+        <button class="btn btn-export" onclick="exportData()">📤 Export Backup</button>
+      </div>
+    </div>
+
+    <!-- Step-by-Step Editor -->
+    <div class="editor-section">
+      <h3>✏️ Edit / Delete Questions (Step-by-Step)</h3>
+      <div class="progress-steps">
+        <div class="step-item active" id="step1"><div class="step-circle">1</div><div class="step-label">Subject</div></div>
+        <div class="step-item" id="step2"><div class="step-circle">2</div><div class="step-label">Unit</div></div>
+        <div class="step-item" id="step3"><div class="step-circle">3</div><div class="step-label">Marks</div></div>
+        <div class="step-item" id="step4"><div class="step-circle">4</div><div class="step-label">Select Q</div></div>
+      </div>
+      <div class="selection-breadcrumb" id="breadcrumb" style="display:none;"></div>
+      <div class="editor-actions">
+        <button class="btn btn-back" id="btnBack" onclick="stepBack()" style="display:none;">⬅️ Back</button>
+        <button class="btn btn-reset" id="btnReset" onclick="resetEditor()" style="display:none;">🔄 Start Over</button>
+      </div>
+      <div class="selection-panel" id="selectionPanel"></div>
+    </div>
+
+    <!-- ============ NEW: PDF MANAGEMENT SECTION ============ -->
+    <div class="settings-section" style="margin-top: 25px; border-color: #16a085; background: #f0fdf4;">
+      <h3 style="color: #16a085;">📄 PDF Resource Management</h3>
+      <div class="hint" style="background: #e6f7ef; border-left-color: #16a085; color: #0d5c4a;">
+        💡 <b>Note:</b> PDFs are stored in your browser's local storage. To prevent storage limits, please keep uploads under <b>3MB</b> each.
+      </div>
+      <div class="form-grid">
+        <div>
+          <label>Subject</label>
+          <select id="pdfSubject">
+            <option value="AML">AML</option>
+            <option value="AJP">AJP</option>
+            <option value="WebDev">Web Development</option>
+            <option value="General">General</option>
+          </select>
+        </div>
+        <div>
+          <label>Unit (Optional)</label>
+          <select id="pdfUnit">
+            <option value="All">All Units</option>
+            <option value="1">Unit 1</option>
+            <option value="2">Unit 2</option>
+            <option value="3">Unit 3</option>
+            <option value="4">Unit 4</option>
+            <option value="5">Unit 5</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>PDF Title</label>
+          <input type="text" id="pdfTitle" placeholder="e.g., Unit 1 Complete Notes">
+        </div>
+        <div class="full">
+          <label>Upload PDF File (Max 3MB)</label>
+          <input type="file" id="pdfFile" accept=".pdf" style="padding:10px;border:2px solid #ddd;border-radius:6px;width:100%;">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-save" onclick="uploadPDF()" style="background:#16a085;">📤 Upload PDF</button>
+      </div>
+      <div id="pdfList" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="settings-section">
+      <h3>🔐 Security Settings</h3>
+      <div class="settings-row">
+        <div class="field">
+          <label>Current Password</label>
+          <input type="password" id="currentPass" placeholder="Enter current password">
+        </div>
+        <div class="field">
+          <label>New Password</label>
+          <input type="password" id="newPass" placeholder="Enter new password">
+        </div>
+        <div class="field">
+          <label>Confirm New Password</label>
+          <input type="password" id="confirmPass" placeholder="Re-enter new password">
+        </div>
+        <button class="btn btn-change-pass" onclick="changePassword()">🔑 Change Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STUDY PANEL ============ -->
+  <div id="studyPanel">
+    <div class="controls">
+      <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search questions...">
+      <button class="btn btn-pdf" onclick="downloadPDF()">📄 Download PDF</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-subject="AML">AML</div>
+      <div class="tab" data-subject="AJP">AJP</div>
+      <div class="tab" data-subject="WebDev">Web Development</div>
+      <div class="tab" data-subject="PDFs" style="color:#16a085;">📄 PDFs</div>
+    </div>
+    <div class="units-bar" id="unitsBar"></div>
+    <div class="marks-filter">
+      <button class="marks-btn active" data-marks="all">All</button>
+      <button class="marks-btn" data-marks="2">2 Marks</button>
+      <button class="marks-btn" data-marks="5">5 Marks</button>
+      <button class="marks-btn" data-marks="10">10 Marks</button>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <footer>
+    <p>© 2026 Exam Prep Portal | Study Smart, Score Big 🎯</p>
+  </footer>
+</div>
+
+<!-- ============ LOGIN MODAL ============ -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <h2>🔐 Admin Login</h2>
+    <p class="subtitle">Enter password to access admin features</p>
+    <div class="error-msg" id="loginError">❌ Incorrect password. Try again.</div>
+    <div class="default-pass-hint">
+      💡 <b>Default password:</b> <code>admin123</code><br>
+      (You can change it after login in Admin Dashboard → Security Settings)
+    </div>
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="Enter admin password" onkeypress="if(event.key==='Enter') attemptLogin()">
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeLoginModal()">Cancel</button>
+      <button class="btn btn-login" onclick="attemptLogin()">🔓 Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ NEW: PDF VIEWER MODAL ============ -->
+<div class="pdf-modal-overlay" id="pdfModal">
+  <div class="pdf-modal-content">
+    <div class="pdf-modal-header">
+      <h3 id="pdfViewerTitle">PDF Viewer</h3>
+      <button class="pdf-modal-close" onclick="closePDFModal()">✕</button>
+    </div>
+    <div class="pdf-modal-body">
+      <iframe id="pdfViewerFrame" src=""></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ DEFAULT DATA ============ */
+const defaultData = {
+  AML: { 1: [
+    { q: "Define Artificial Intelligence.", marks: 2,
+      a: "<p>Artificial Intelligence (AI) is the branch of computer science that deals with creating machines capable of performing tasks that typically require human intelligence.</p>",
+      img: "" }
+  ], 2: [], 3: [], 4: [], 5: [] },
+  AJP: { 1: [
+    { q: "What is Java? List its features.", marks: 2,
+      a: "<p>Java is a high-level, class-based, object-oriented programming language designed for portability.</p>",
+      img: "" }
+  ], 2: [], 3: [], 4: [], 5: [] },
+  WebDev: { 1: [
+    { q: "What is HTML?", marks: 2,
+      a: "<p>HTML (HyperText Markup Language) is the standard markup language used to create and structure content on the web.</p>",
+      img: "" }
+  ], 2: [], 3: [], 4: [], 5: [] }
+};
+
+/* ============ 🌟 SMART TEXT → HTML CONVERTER ============ */
+function smartFormat(text) {
+  if (!text || !text.trim()) return '';
+  let safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  safe = safe.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  safe = safe.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<i>$1</i>');
+
+  const lines = safe.split('\n');
+  let html = '';
+  let inUl = false;
+  let inOl = false;
+  let currentPara = '';
+
+  function flushPara() {
+    if (currentPara.trim()) {
+      html += '<p>' + currentPara.trim() + '</p>';
+      currentPara = '';
+    }
+  }
+  function closeLists() {
+    if (inUl) { html += '</ul>'; inUl = false; }
+    if (inOl) { html += '</ol>'; inOl = false; }
+  }
+
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === '') {
+      flushPara();
+      closeLists();
+      continue;
+    }
+    if (/^[-*]\s+/.test(trimmed)) {
+      flushPara();
+      if (inOl) { html += '</ol>'; inOl = false; }
+      if (!inUl) { html += '<ul>'; inUl = true; }
+      html += '<li>' + trimmed.replace(/^[-*]\s+/, '') + '</li>';
+      continue;
+    }
+    if (/^\d+\.\s+/.test(trimmed)) {
+      flushPara();
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (!inOl) { html += '<ol>'; inOl = true; }
+      html += '<li>' + trimmed.replace(/^\d+\.\s+/, '') + '</li>';
+      continue;
+    }
+    closeLists();
+    currentPara += (currentPara ? ' ' : '') + trimmed;
+  }
+  flushPara();
+  closeLists();
+  return html;
+}
+
+/* ============ DATA MANAGEMENT ============ */
+function loadData() {
+  const saved = localStorage.getItem('examPrepData');
+  if (saved) {
+    try { return JSON.parse(saved); }
+    catch(e) { return JSON.parse(JSON.stringify(defaultData)); }
+  }
+  return JSON.parse(JSON.stringify(defaultData));
+}
+function saveData() {
+  localStorage.setItem('examPrepData', JSON.stringify(studyData));
+}
+
+/* ============ PASSWORD MANAGEMENT ============ */
+const DEFAULT_PASSWORD = 'admin123';
+function getPassword() { return localStorage.getItem('adminPassword') || DEFAULT_PASSWORD; }
+function setPassword(pass) { localStorage.setItem('adminPassword', pass); }
+
+/* ============ APP STATE ============ */
+let studyData = loadData();
+let currentSubject = 'AML';
+let currentUnit = 1;
+let currentMarks = 'all';
+let searchTerm = '';
+let editingId = null;
+let isAdminLoggedIn = false;
+let editorStep = 1;
+let editorSubject = null;
+let editorUnit = null;
+let editorMarks = null;
+
+/* ============ 🌟 EASY IMPORT FUNCTIONS ============ */
+document.querySelectorAll('.import-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const method = tab.dataset.import;
+    document.getElementById('import-simple').style.display = method === 'simple' ? 'block' : 'none';
+    document.getElementById('import-bulk').style.display = method === 'bulk' ? 'block' : 'none';
+    document.getElementById('import-csv').style.display = method === 'csv' ? 'block' : 'none';
+  };
+});
+
+function parseSimpleText(text) {
+  const blocks = text.split(/\n---+\n|\n---+$/);
+  const questions = [];
+  blocks.forEach(block => {
+    block = block.trim();
+    if (!block) return;
+    const lines = block.split('\n');
+    let q = '', a = '', inAnswer = false;
+    lines.forEach(line => {
+      const t = line.trim();
+      if (/^Q\s*:\s*/i.test(t)) {
+        q = t.replace(/^Q\s*:\s*/i, '').trim();
+        inAnswer = false;
+      } else if (/^A\s*:\s*/i.test(t)) {
+        a = t.replace(/^A\s*:\s*/i, '').trim();
+        inAnswer = true;
+      } else if (inAnswer) {
+        a += '\n' + line;
+      }
+    });
+    if (q && a) questions.push({ q, a: smartFormat(a) });
+  });
+  return questions;
+}
+
+function previewSimple() {
+  const text = document.getElementById('simpleText').value;
+  const questions = parseSimpleText(text);
+  const sub = document.getElementById('impSubject').value;
+  const unit = document.getElementById('impUnit').value;
+  const marks = document.getElementById('impMarks').value;
+  const box = document.getElementById('previewSimple');
+
+  if (questions.length === 0) {
+    box.innerHTML = '<p style="color:#c0392b;">❌ No questions found. Check format (Q: and A: required).</p>';
+    box.classList.add('show');
+    return;
+  }
+
+  box.innerHTML = `<p style="color:#2e7d32;font-weight:600;margin-bottom:10px;">✅ Found ${questions.length} question(s) for ${sub} • Unit ${unit} • ${marks} Marks</p>` +
+    questions.map((q, i) => `
+      <div class="preview-item">
+        <strong>Q${i+1}:</strong> ${q.q}
+        <small><b>Answer preview:</b> ${q.a.replace(/<[^>]+>/g, ' ').substring(0, 150)}...</small>
+      </div>
+    `).join('');
+  box.classList.add('show');
+}
+
+function importSimple() {
+  if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
+  const text = document.getElementById('simpleText').value;
+  const questions = parseSimpleText(text);
+  if (questions.length === 0) {
+    alert('❌ No questions found! Make sure to use Q: and A: format.');
+    return;
+  }
+  const sub = document.getElementById('impSubject').value;
+  const unit = parseInt(document.getElementById('impUnit').value);
+  const marks = parseInt(document.getElementById('impMarks').value);
+
+  if (!studyData[sub]) studyData[sub] = {};
+  if (!studyData[sub][unit]) studyData[sub][unit] = [];
+
+  questions.forEach(q => {
+    studyData[sub][unit].push({ q: q.q, marks, a: q.a, img: '' });
+  });
+
+  saveData();
+  alert(`✅ Successfully imported ${questions.length} question(s)!`);
+  document.getElementById('simpleText').value = '';
+  document.getElementById('previewSimple').classList.remove('show');
+  renderQuestions();
+  renderEditor();
+}
+
+function downloadSimpleTemplate() {
+  const template = `Q: Define Artificial Intelligence.
+A: AI is the branch of computer science that creates machines capable of human-like intelligence.
+
+---
+
+Q: List features of Java.
+A: Java has many features:
+- Simple
+- Object-Oriented
+- Platform-Independent
+- **Secure** and Robust
+
+---
+
+Q: Explain the steps of software development.
+A: Software development has these steps:
+1. Requirement Analysis
+2. Design
+3. Coding
+4. Testing
+5. Deployment`;
+
+  const blob = new Blob([template], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'questions_template.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importBulk() {
+  if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
+  const qText = document.getElementById('bulkQuestions').value.trim();
+  const aText = document.getElementById('bulkAnswers').value.trim();
+  if (!qText || !aText) {
+    alert('⚠️ Please fill both Questions and Answers!');
+    return;
+  }
+  const questions = qText.split('\n').map(l => l.trim()).filter(l => l);
+  const answers = aText.split('\n').map(l => l.trim()).filter(l => l);
+
+  if (questions.length !== answers.length) {
+    alert(`⚠️ Mismatch! ${questions.length} questions but ${answers.length} answers. Please match them.`);
+    return;
+  }
+
+  const sub = document.getElementById('bulkSubject').value;
+  const unit = parseInt(document.getElementById('bulkUnit').value);
+  const marks = parseInt(document.getElementById('bulkMarks').value);
+
+  if (!studyData[sub]) studyData[sub] = {};
+  if (!studyData[sub][unit]) studyData[sub][unit] = [];
+
+  questions.forEach((q, i) => {
+    studyData[sub][unit].push({ q, marks, a: smartFormat(answers[i]), img: '' });
+  });
+
+  saveData();
+  alert(`✅ Successfully imported ${questions.length} question(s)!`);
+  document.getElementById('bulkQuestions').value = '';
+  document.getElementById('bulkAnswers').value = '';
+  renderQuestions();
+  renderEditor();
+}
+
+function downloadBulkTemplate() {
+  const qTpl = "Define AI.\nWhat is Java?\nExplain HTML.\nWhat is CSS?\nDefine JavaScript.";
+  const aTpl = "AI is artificial intelligence that mimics human thinking.\nJava is a platform-independent programming language.\nHTML is the markup language for web pages.\nCSS is used to style HTML elements.\nJavaScript makes web pages interactive.";
+  const content = "=== QUESTIONS (one per line) ===\n" + qTpl + "\n\n=== ANSWERS (one per line, same order) ===\n" + aTpl;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'bulk_questions_template.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadCSVTemplate() {
+  const csv = `Subject,Unit,Marks,Question,Answer
+AML,1,2,Define AI,AI is artificial intelligence.
+AML,1,5,Explain Turing Test,The Turing Test evaluates machine intelligence.
+AJP,1,2,What is Java,Java is a programming language.
+WebDev,1,2,What is HTML,HTML is markup language for web.`;
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'questions_template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importCSV() {
+  if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
+  const file = document.getElementById('csvFile').files[0];
+  if (!file) { alert('⚠️ Please select a CSV file!'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text = e.target.result;
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { alert('❌ CSV file is empty or invalid!'); return; }
+
+      let count = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (cols.length < 5) continue;
+        const [sub, unit, marks, q, a] = cols;
+        const unitNum = parseInt(unit);
+        const marksNum = parseInt(marks);
+        if (!['AML','AJP','WebDev'].includes(sub) || ![1,2,3,4,5].includes(unitNum) || ![2,5,10].includes(marksNum)) continue;
+        if (!q || !a) continue;
+
+        if (!studyData[sub]) studyData[sub] = {};
+        if (!studyData[sub][unitNum]) studyData[sub][unitNum] = [];
+        studyData[sub][unitNum].push({ q: q.trim(), marks: marksNum, a: smartFormat(a), img: '' });
+        count++;
+      }
+
+      saveData();
+      alert(`✅ Successfully imported ${count} question(s) from CSV!`);
+      document.getElementById('csvFile').value = '';
+      renderQuestions();
+      renderEditor();
+    } catch(err) {
+      alert('❌ Error reading CSV: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+/* ============ LOGIN / LOGOUT ============ */
+function openLoginModal() {
+  document.getElementById('loginModal').classList.add('show');
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  setTimeout(() => document.getElementById('loginPass').focus(), 100);
+}
+function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); }
+function attemptLogin() {
+  const pass = document.getElementById('loginPass').value;
+  if (pass === getPassword()) {
+    isAdminLoggedIn = true;
+    sessionStorage.setItem('adminSession', 'active');
+    closeLoginModal();
+    updateAdminUI();
+    showAdminPanel();
+    alert('✅ Welcome, Admin!');
+  } else {
+    document.getElementById('loginError').classList.add('show');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    isAdminLoggedIn = false;
+    sessionStorage.removeItem('adminSession');
+    updateAdminUI();
+    switchToStudyMode();
+    alert('👋 Logged out successfully.');
+  }
+}
+function updateAdminUI() {
+  const badge = document.getElementById('adminBadge');
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (isAdminLoggedIn) { badge.classList.add('show'); logoutBtn.classList.add('show'); }
+  else { badge.classList.remove('show'); logoutBtn.classList.remove('show'); }
+}
+
+/* ============ MODE SWITCHING ============ */
+function showAdminPanel() {
+  document.getElementById('adminPanel').style.display = 'block';
+  document.getElementById('studyPanel').style.display = 'none';
+  renderEditor();
+  renderAdminPDFList();
+}
+function switchToStudyMode() {
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('studyPanel').style.display = 'block';
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.mode-btn[data-mode="study"]').classList.add('active');
+}
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const mode = btn.dataset.mode;
+    if (mode === 'admin') {
+      if (!isAdminLoggedIn) {
+        openLoginModal();
+        setTimeout(() => { if (!isAdminLoggedIn) switchToStudyMode(); }, 100);
+      } else { showAdminPanel(); }
+    } else { switchToStudyMode(); }
+  };
+});
+
+/* ============ CHANGE PASSWORD ============ */
+function changePassword() {
+  const current = document.getElementById('currentPass').value;
+  const newP = document.getElementById('newPass').value;
+  const confirm = document.getElementById('confirmPass').value;
+  if (!current || !newP || !confirm) { alert('⚠️ Please fill all password fields!'); return; }
+  if (current !== getPassword()) { alert('❌ Current password is incorrect!'); return; }
+  if (newP.length < 4) { alert('⚠️ New password must be at least 4 characters!'); return; }
+  if (newP !== confirm) { alert('❌ New passwords do not match!'); return; }
+  if (confirm('🔑 Change password?')) {
+    setPassword(newP);
+    document.getElementById('currentPass').value = '';
+    document.getElementById('newPass').value = '';
+    document.getElementById('confirmPass').value = '';
+    alert('✅ Password changed successfully!');
+  }
+}
+
+/* ============ ADMIN: ADD SINGLE QUESTION ============ */
+function saveQuestion() {
+  if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
+  const subject = document.getElementById('fSubject').value;
+  const unit = parseInt(document.getElementById('fUnit').value);
+  const marks = parseInt(document.getElementById('fMarks').value);
+  const q = document.getElementById('fQuestion').value.trim();
+  const aRaw = document.getElementById('fAnswer').value.trim();
+  const img = document.getElementById('fImage').value.trim();
+  if (!q || !aRaw) { alert('⚠️ Please fill both Question and Answer!'); return; }
+  if (!studyData[subject]) studyData[subject] = {};
+  if (!studyData[subject][unit]) studyData[subject][unit] = [];
+  const newQ = { q, marks, a: smartFormat(aRaw), img };
+  if (editingId !== null) {
+    studyData[subject][unit][editingId] = newQ;
+    editingId = null;
+    alert('✅ Question updated!');
+  } else {
+    studyData[subject][unit].push(newQ);
+    alert('✅ Question added successfully!');
+  }
+  saveData();
+  clearForm();
+  renderQuestions();
+  renderEditor();
+}
+function clearForm() {
+  document.getElementById('fQuestion').value = '';
+  document.getElementById('fAnswer').value = '';
+  document.getElementById('fImage').value = '';
+  editingId = null;
+}
+
+/* ============ STEP-BY-STEP EDITOR ============ */
+function renderEditor() {
+  updateProgressSteps();
+  updateBreadcrumb();
+  updateEditorButtons();
+  const panel = document.getElementById('selectionPanel');
+  if (editorStep === 1) {
+    const subjects = [
+      { key: 'AML', name: 'AML', icon: '🤖' },
+      { key: 'AJP', name: 'AJP', icon: '☕' },
+      { key: 'WebDev', name: 'Web Dev', icon: '🌐' }
+    ];
+    panel.innerHTML = `<h4>📌 Step 1: Select Subject</h4><div class="selection-grid">` +
+      subjects.map(s => `<div class="select-card" onclick="selectSubject('${s.key}')"><span class="card-icon">${s.icon}</span><div class="card-title">${s.name}</div><div class="card-count">${countQuestions(s.key)} questions</div></div>`).join('') +
+      `</div>`;
+  } else if (editorStep === 2) {
+    panel.innerHTML = `<h4>📌 Step 2: Select Unit</h4><div class="selection-grid">` +
+      [1,2,3,4,5].map(u => `<div class="select-card" onclick="selectUnit(${u})"><span class="card-icon">📘</span><div class="card-title">Unit ${u}</div><div class="card-count">${countQuestions(editorSubject, u)} questions</div></div>`).join('') +
+      `</div>`;
+  } else if (editorStep === 3) {
+    const colors = { 2: '#27ae60', 5: '#f39c12', 10: '#e74c3c' };
+    panel.innerHTML = `<h4>📌 Step 3: Select Marks</h4><div class="selection-grid">` +
+      [2,5,10].map(m => `<div class="select-card" onclick="selectMarks(${m})"><span class="card-icon" style="color:${colors[m]};">🎯</span><div class="card-title">${m} Marks</div><div class="card-count">${countQuestions(editorSubject, editorUnit, m)} questions</div></div>`).join('') +
+      `</div>`;
+  } else if (editorStep === 4) {
+    const questions = (studyData[editorSubject]?.[editorUnit] || []).filter(q => q.marks === editorMarks);
+    panel.innerHTML = `<h4>📌 Step 4: Edit or Delete (${questions.length} found)</h4>` +
+      (questions.length === 0 ?
+        `<div class="no-questions">📭 No questions found.</div>` :
+        `<div class="editor-q-list">` +
+        questions.map((q, idx) => {
+          const realIdx = studyData[editorSubject][editorUnit].indexOf(q);
+          const plainA = (typeof q.a === 'string') ? q.a.replace(/<[^>]+>/g, ' ') : '';
+          return `<div class="editor-q-item">
+            <div class="editor-q-info">
+              <div class="q-text">Q${idx+1}. ${q.q}</div>
+              <div class="a-preview">💬 ${plainA.substring(0, 120)}${plainA.length>120?'...':''}</div>
+            </div>
+            <div class="editor-q-actions">
+              <button class="btn-sm btn-edit" onclick="editFromEditor(${realIdx})">✏️ Edit</button>
+              <button class="btn-sm btn-del" onclick="deleteFromEditor(${realIdx})">🗑️ Delete</button>
+            </div>
+          </div>`;
+        }).join('') + `</div>`);
+  }
+}
+
+function countQuestions(sub, unit, marks) {
+  if (!sub) {
+    let total = 0;
+    ['AML','AJP','WebDev'].forEach(s => { for (let u = 1; u <= 5; u++) total += (studyData[s]?.[u] || []).length; });
+    return total;
+  }
+  if (!unit) {
+    let total = 0;
+    for (let u = 1; u <= 5; u++) total += (studyData[sub]?.[u] || []).length;
+    return total;
+  }
+  if (!marks) return (studyData[sub]?.[unit] || []).length;
+  return (studyData[sub]?.[unit] || []).filter(q => q.marks === marks).length;
+}
+
+function selectSubject(sub) { editorSubject = sub; editorStep = 2; renderEditor(); }
+function selectUnit(u) { editorUnit = u; editorStep = 3; renderEditor(); }
+function selectMarks(m) { editorMarks = m; editorStep = 4; renderEditor(); }
+function stepBack() {
+  if (editorStep === 4) { editorMarks = null; editorStep = 3; }
+  else if (editorStep === 3) { editorUnit = null; editorStep = 2; }
+  else if (editorStep === 2) { editorSubject = null; editorStep = 1; }
+  renderEditor();
+}
+function resetEditor() {
+  editorStep = 1; editorSubject = null; editorUnit = null; editorMarks = null;
+  renderEditor();
+}
+
+function updateProgressSteps() {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active', 'done');
+    if (i < editorStep) el.classList.add('done');
+    else if (i === editorStep) el.classList.add('active');
+  }
+}
+function updateBreadcrumb() {
+  const bc = document.getElementById('breadcrumb');
+  const subjectNames = { AML: '🤖 AML', AJP: '☕ AJP', WebDev: '🌐 Web Dev' };
+  if (editorStep === 1) { bc.style.display = 'none'; return; }
+  bc.style.display = 'flex';
+  let html = '';
+  if (editorSubject) html += `<span class="breadcrumb-item">${subjectNames[editorSubject]}</span>`;
+  if (editorUnit) html += `<span class="breadcrumb-sep">›</span><span class="breadcrumb-item">📘 Unit ${editorUnit}</span>`;
+  if (editorMarks) html += `<span class="breadcrumb-sep">›</span><span class="breadcrumb-item">🎯 ${editorMarks} Marks</span>`;
+  bc.innerHTML = html;
+}
+function updateEditorButtons() {
+  document.getElementById('btnBack').style.display = editorStep > 1 ? 'inline-block' : 'none';
+  document.getElementById('btnReset').style.display = editorStep > 1 ? 'inline-block' : 'none';
+}
+
+function editFromEditor(idx) {
+  if (!isAdminLoggedIn) { alert('🔒 Admin login required!'); return; }
+  const q = studyData[editorSubject][editorUnit][idx];
+  document.getElementById('fSubject').value = editorSubject;
+  document.getElementById('fUnit').value = editorUnit;
+  document.getElementById('fMarks').value = q.marks;
+  document.getElementById('fQuestion').value = q.q;
+  const plainA = (typeof q.a === 'string') ? q.a.replace(/<p>/g, '\n').replace(/<\/p>/g, '').replace(/<br\s*\/?>/g, '\n').replace(/<li>/g, '- ').replace(/<\/li>/g, '').replace(/<\/?[uo]l>/g, '').replace(/<b>(.*?)<\/b>/g, '**$1**').replace(/<[^>]+>/g, '').trim() : '';
+  document.getElementById('fAnswer').value = plainA;
+  document.getElementById('fImage').value = q.img || '';
+  editingId = idx;
+  window.scrollTo({ top: document.querySelector('.admin-panel').offsetTop, behavior: 'smooth' });
+  alert('✅ Question loaded. Edit and click "💾 Save Question" to update.');
+}
+
+function deleteFromEditor(idx) {
+  if (!isAdminLoggedIn) { alert('🔒 Admin login required!'); return; }
+  const q = studyData[editorSubject][editorUnit][idx];
+  if (!confirm(`🗑️ Delete this question?\n\n"${q.q}"\n\nThis cannot be undone.`)) return;
+  studyData[editorSubject][editorUnit].splice(idx, 1);
+  saveData();
+  renderEditor();
+  renderQuestions();
+  alert('✅ Question deleted.');
+}
+
+/* ============ EXPORT ============ */
+function exportData() {
+  const blob = new Blob([JSON.stringify(studyData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `exam_prep_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============ STUDY MODE RENDER ============ */
+function renderUnits() {
+  const bar = document.getElementById('unitsBar');
+  bar.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'unit-btn' + (i === currentUnit ? ' active' : '');
+    btn.textContent = 'Unit ' + i;
+    btn.onclick = () => { currentUnit = i; renderUnits(); renderQuestions(); };
+    bar.appendChild(btn);
+  }
+}
+function renderQuestions() {
+  const content = document.getElementById('content');
+  const questions = (studyData[currentSubject] && studyData[currentSubject][currentUnit]) || [];
+  const filtered = questions.filter(q => {
+    const matchMarks = currentMarks === 'all' || q.marks == currentMarks;
+    const matchSearch = !searchTerm ||
+      q.q.toLowerCase().includes(searchTerm) ||
+      (typeof q.a === 'string' && q.a.toLowerCase().includes(searchTerm));
+    return matchMarks && matchSearch;
+  });
+  if (filtered.length === 0) {
+    content.innerHTML = '<div class="empty">📭 No questions found.</div>';
+    return;
+  }
+  content.innerHTML = filtered.map((q) => `
+    <div class="question-card">
+      <div class="question-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="q-title">Q. ${q.q}</span>
+        <span class="q-marks m${q.marks}">${q.marks} Marks</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="answer">
+        <div>${q.a}</div>
+        ${q.img ? `<div class="diagram"><img src="${q.img}" alt="Diagram" onerror="this.style.display='none'"><div class="diagram-caption">Fig: Related Diagram</div></div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============ PDF DOWNLOAD ============ */
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const subject = currentSubject;
+  const unit = currentUnit;
+  const questions = (studyData[subject] && studyData[subject][unit]) || [];
+  doc.setFontSize(18);
+  doc.text(`${subject} - Unit ${unit} Questions`, 20, 20);
+  doc.setFontSize(10);
+  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 28);
+  let y = 40;
+  questions.forEach((q, i) => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    const qText = `Q${i+1}. [${q.marks} Marks] ${q.q}`;
+    const qLines = doc.splitTextToSize(qText, 170);
+    doc.text(qLines, 20, y);
+    y += qLines.length * 6 + 4;
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    const plainAns = (typeof q.a === 'string') ? q.a.replace(/<[^>]+>/g, ' ') : '';
+    const aLines = doc.splitTextToSize(`Ans: ${plainAns}`, 170);
+    aLines.forEach(line => {
+      if (y > 280) { doc.addPage(); y = 20; }
+      doc.text(line, 20, y);
+      y += 5;
+    });
+    y += 6;
+  });
+  doc.save(`${subject}_Unit${unit}_Questions.pdf`);
+}
+
+/* ============ STUDY EVENT LISTENERS ============ */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentSubject = tab.dataset.subject;
+    currentUnit = 1;
+    
+    if (currentSubject === 'PDFs') {
+      document.getElementById('unitsBar').style.display = 'none';
+      document.querySelector('.marks-filter').style.display = 'none';
+      renderPDFs();
+    } else {
+      document.getElementById('unitsBar').style.display = 'flex';
+      document.querySelector('.marks-filter').style.display = 'flex';
+      renderUnits();
+      renderQuestions();
+    }
+  };
+});
+document.querySelectorAll('.marks-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.marks-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMarks = btn.dataset.marks;
+    renderQuestions();
+  };
+});
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase();
+  renderQuestions();
+});
+
+/* ============ NEW: PDF MANAGEMENT FUNCTIONS ============ */
+function getPDFs() {
+  const saved = localStorage.getItem('examPrepPDFs');
+  return saved ? JSON.parse(saved) : [];
+}
+function savePDFs(pdfs) {
+  localStorage.setItem('examPrepPDFs', JSON.stringify(pdfs));
+}
+
+function uploadPDF() {
+  if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
+  const fileInput = document.getElementById('pdfFile');
+  const title = document.getElementById('pdfTitle').value.trim();
+  const subject = document.getElementById('pdfSubject').value;
+  const unit = document.getElementById('pdfUnit').value;
+
+  if (!fileInput.files[0]) { alert('⚠️ Please select a PDF file!'); return; }
+  if (!title) { alert('⚠️ Please enter a PDF title!'); return; }
+
+  const file = fileInput.files[0];
+  if (file.type !== 'application/pdf') { alert('⚠️ Only PDF files are allowed!'); return; }
+  if (file.size > 3 * 1024 * 1024) { alert('⚠️ File size exceeds 3MB limit (browser storage constraint). Please upload a smaller file.'); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const pdfs = getPDFs();
+    const newPDF = {
+      id: Date.now().toString(),
+      title: title,
+      subject: subject,
+      unit: unit,
+      dataUrl: e.target.result,
+      date: new Date().toLocaleDateString()
+    };
+    pdfs.push(newPDF);
+    try {
+      savePDFs(pdfs);
+      alert('✅ PDF uploaded successfully!');
+      document.getElementById('pdfTitle').value = '';
+      fileInput.value = '';
+      renderAdminPDFList();
+    } catch (err) {
+      alert('❌ Storage full! Please delete some PDFs or clear browser data.\n' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function deletePDF(id) {
+  if (!isAdminLoggedIn) { alert('🔒 Admin login required!'); return; }
+  if (!confirm('🗑️ Are you sure you want to delete this PDF? This cannot be undone.')) return;
+  let pdfs = getPDFs();
+  pdfs = pdfs.filter(p => p.id !== id);
+  savePDFs(pdfs);
+  renderAdminPDFList();
+  alert('✅ PDF deleted.');
+}
+
+function renderAdminPDFList() {
+  const container = document.getElementById('pdfList');
+  const pdfs = getPDFs();
+  if (pdfs.length === 0) {
+    container.innerHTML = '<p style="color:#666; font-style:italic;">No PDFs uploaded yet.</p>';
+    return;
+  }
+  container.innerHTML = '<h4 style="margin-bottom:10px; color:#16a085;">Uploaded PDFs</h4>' +
+    pdfs.map(pdf => `
+      <div class="pdf-item">
+        <div class="pdf-info">
+          <h4>📄 ${pdf.title}</h4>
+          <small>${pdf.subject} | Unit ${pdf.unit} | ${pdf.date}</small>
+        </div>
+        <div class="pdf-actions">
+          <button class="btn btn-sm btn-delete-pdf" onclick="deletePDF('${pdf.id}')">🗑️ Delete</button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function renderPDFs() {
+  const content = document.getElementById('content');
+  const pdfs = getPDFs();
+  if (pdfs.length === 0) {
+    content.innerHTML = '<div class="empty">📭 No PDF resources uploaded yet. Check back later!</div>';
+    return;
+  }
+  content.innerHTML = pdfs.map(pdf => `
+    <div class="pdf-item">
+      <div class="pdf-info">
+        <h4>📄 ${pdf.title}</h4>
+        <small>Subject: <b>${pdf.subject}</b> | Unit: <b>${pdf.unit}</b> | Added: ${pdf.date}</small>
+      </div>
+      <div class="pdf-actions">
+        <button class="btn btn-sm btn-view-pdf" onclick="viewPDF('${pdf.id}')">👁️ View</button>
+        <button class="btn btn-sm btn-download-pdf" onclick="downloadPDFFile('${pdf.id}')">📥 Download</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewPDF(id) {
+  const pdfs = getPDFs();
+  const pdf = pdfs.find(p => p.id === id);
+  if (!pdf) return;
+  document.getElementById('pdfViewerTitle').textContent = pdf.title;
+  document.getElementById('pdfViewerFrame').src = pdf.dataUrl;
+  document.getElementById('pdfModal').classList.add('show');
+}
+
+function closePDFModal() {
+  document.getElementById('pdfModal').classList.remove('show');
+  document.getElementById('pdfViewerFrame').src = '';
+}
+
+function downloadPDFFile(id) {
+  const pdfs = getPDFs();
+  const pdf = pdfs.find(p => p.id === id);
+  if (!pdf) return;
+  const a = document.createElement('a');
+  a.href = pdf.dataUrl;
+  a.download = pdf.title.replace(/[^a-z0-9]/gi, '_') + '.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* ============ INIT ============ */
+if (sessionStorage.getItem('adminSession') === 'active') {
+  isAdminLoggedIn = true;
+  updateAdminUI();
+}
+renderUnits();
+renderQuestions();
+</script>
+</body>
+</html>
