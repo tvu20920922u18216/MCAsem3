@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exam Prep - AML | AJP | Web Development</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- FIREBASE SDK (Required for global cloud storage) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
   body {
@@ -626,7 +632,7 @@
     margin-bottom: 15px;
   }
 
-  /* ========== NEW: PDF FEATURES ========== */
+  /* ========== PDF FEATURES ========== */
   .pdf-item {
     background: #fff;
     border: 1px solid #c8e6c9;
@@ -734,7 +740,7 @@
   <div class="admin-panel" id="adminPanel" style="display:none;">
     <h2>⚙️ Admin Dashboard</h2>
 
-    <!-- ============ 🌟 EASY IMPORT SECTION ============ -->
+    <!-- ============ EASY IMPORT SECTION ============ -->
     <div class="import-section">
       <h3>🌟 Easy Import Questions (No HTML Needed!)</h3>
 
@@ -962,11 +968,11 @@ JavaScript makes web pages interactive."></textarea>
       <div class="selection-panel" id="selectionPanel"></div>
     </div>
 
-    <!-- ============ NEW: PDF MANAGEMENT SECTION ============ -->
+    <!-- ============ PDF MANAGEMENT SECTION (FIREBASE) ============ -->
     <div class="settings-section" style="margin-top: 25px; border-color: #16a085; background: #f0fdf4;">
-      <h3 style="color: #16a085;">📄 PDF Resource Management</h3>
+      <h3 style="color: #16a085;">📄 PDF Resource Management (Cloud)</h3>
       <div class="hint" style="background: #e6f7ef; border-left-color: #16a085; color: #0d5c4a;">
-        💡 <b>Note:</b> PDFs are stored in your browser's local storage. To prevent storage limits, please keep uploads under <b>3MB</b> each.
+        💡 <b>Cloud Storage:</b> PDFs are now uploaded to Firebase Cloud Storage. They will be visible to <b>all users</b> globally. (Max 10MB per file).
       </div>
       <div class="form-grid">
         <div>
@@ -994,12 +1000,12 @@ JavaScript makes web pages interactive."></textarea>
           <input type="text" id="pdfTitle" placeholder="e.g., Unit 1 Complete Notes">
         </div>
         <div class="full">
-          <label>Upload PDF File (Max 3MB)</label>
+          <label>Upload PDF File (Max 10MB)</label>
           <input type="file" id="pdfFile" accept=".pdf" style="padding:10px;border:2px solid #ddd;border-radius:6px;width:100%;">
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-save" onclick="uploadPDF()" style="background:#16a085;">📤 Upload PDF</button>
+        <button class="btn btn-save" onclick="uploadPDF()" style="background:#16a085;" id="uploadPdfBtn">📤 Upload to Cloud</button>
       </div>
       <div id="pdfList" style="margin-top: 20px;"></div>
     </div>
@@ -1071,7 +1077,7 @@ JavaScript makes web pages interactive."></textarea>
   </div>
 </div>
 
-<!-- ============ NEW: PDF VIEWER MODAL ============ -->
+<!-- ============ PDF VIEWER MODAL ============ -->
 <div class="pdf-modal-overlay" id="pdfModal">
   <div class="pdf-modal-content">
     <div class="pdf-modal-header">
@@ -1085,6 +1091,24 @@ JavaScript makes web pages interactive."></textarea>
 </div>
 
 <script>
+/* ==========================================================================
+   FIREBASE CONFIGURATION
+   !!! REPLACE THE PLACEHOLDER VALUES BELOW WITH YOUR ACTUAL FIREBASE CONFIG !!!
+   ========================================================================== */
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
 /* ============ DEFAULT DATA ============ */
 const defaultData = {
   AML: { 1: [
@@ -1104,7 +1128,7 @@ const defaultData = {
   ], 2: [], 3: [], 4: [], 5: [] }
 };
 
-/* ============ 🌟 SMART TEXT → HTML CONVERTER ============ */
+/* ============ SMART TEXT → HTML CONVERTER ============ */
 function smartFormat(text) {
   if (!text || !text.trim()) return '';
   let safe = text
@@ -1175,7 +1199,7 @@ function saveData() {
 }
 
 /* ============ PASSWORD MANAGEMENT ============ */
-const DEFAULT_PASSWORD = 'admin123';
+const DEFAULT_PASSWORD = '209mca-sem3#pg';
 function getPassword() { return localStorage.getItem('adminPassword') || DEFAULT_PASSWORD; }
 function setPassword(pass) { localStorage.setItem('adminPassword', pass); }
 
@@ -1192,7 +1216,7 @@ let editorSubject = null;
 let editorUnit = null;
 let editorMarks = null;
 
-/* ============ 🌟 EASY IMPORT FUNCTIONS ============ */
+/* ============ EASY IMPORT FUNCTIONS ============ */
 document.querySelectorAll('.import-tab').forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
@@ -1450,6 +1474,7 @@ function attemptLogin() {
     closeLoginModal();
     updateAdminUI();
     showAdminPanel();
+    if (currentSubject === 'PDFs') renderPDFs(); // Refresh to show delete buttons
     alert('✅ Welcome, Admin!');
   } else {
     document.getElementById('loginError').classList.add('show');
@@ -1463,6 +1488,7 @@ function logout() {
     sessionStorage.removeItem('adminSession');
     updateAdminUI();
     switchToStudyMode();
+    if (currentSubject === 'PDFs') renderPDFs(); // Refresh to hide delete buttons
     alert('👋 Logged out successfully.');
   }
 }
@@ -1729,7 +1755,7 @@ function renderQuestions() {
   `).join('');
 }
 
-/* ============ PDF DOWNLOAD ============ */
+/* ============ PDF DOWNLOAD (Questions) ============ */
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -1796,15 +1822,9 @@ document.getElementById('searchBox').addEventListener('input', e => {
   renderQuestions();
 });
 
-/* ============ NEW: PDF MANAGEMENT FUNCTIONS ============ */
-function getPDFs() {
-  const saved = localStorage.getItem('examPrepPDFs');
-  return saved ? JSON.parse(saved) : [];
-}
-function savePDFs(pdfs) {
-  localStorage.setItem('examPrepPDFs', JSON.stringify(pdfs));
-}
-
+/* ==========================================================================
+   FIREBASE PDF MANAGEMENT FUNCTIONS
+   ========================================================================== */
 function uploadPDF() {
   if (!isAdminLoggedIn) { alert('🔒 Please login as admin first!'); return; }
   const fileInput = document.getElementById('pdfFile');
@@ -1817,91 +1837,126 @@ function uploadPDF() {
 
   const file = fileInput.files[0];
   if (file.type !== 'application/pdf') { alert('⚠️ Only PDF files are allowed!'); return; }
-  if (file.size > 3 * 1024 * 1024) { alert('⚠️ File size exceeds 3MB limit (browser storage constraint). Please upload a smaller file.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('⚠️ File size exceeds 10MB limit.'); return; }
 
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const pdfs = getPDFs();
-    const newPDF = {
-      id: Date.now().toString(),
+  const uploadBtn = document.getElementById('uploadPdfBtn');
+  const originalText = uploadBtn.textContent;
+  uploadBtn.textContent = '⏳ Uploading to Cloud...';
+  uploadBtn.disabled = true;
+
+  const storageRef = storage.ref(`pdfs/${Date.now()}_${file.name}`);
+  
+  storageRef.put(file).then((snapshot) => {
+    return snapshot.ref.getDownloadURL();
+  }).then((downloadURL) => {
+    return db.collection('pdfs').add({
       title: title,
       subject: subject,
       unit: unit,
-      dataUrl: e.target.result,
-      date: new Date().toLocaleDateString()
-    };
-    pdfs.push(newPDF);
-    try {
-      savePDFs(pdfs);
-      alert('✅ PDF uploaded successfully!');
-      document.getElementById('pdfTitle').value = '';
-      fileInput.value = '';
-      renderAdminPDFList();
-    } catch (err) {
-      alert('❌ Storage full! Please delete some PDFs or clear browser data.\n' + err.message);
+      url: downloadURL,
+      date: new Date().toLocaleDateString(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }).then(() => {
+    alert('✅ PDF uploaded successfully! It is now visible to ALL users globally.');
+    document.getElementById('pdfTitle').value = '';
+    fileInput.value = '';
+    uploadBtn.textContent = originalText;
+    uploadBtn.disabled = false;
+    renderAdminPDFList();
+  }).catch((error) => {
+    console.error("Error uploading PDF: ", error);
+    alert('❌ Error uploading PDF: ' + error.message);
+    uploadBtn.textContent = originalText;
+    uploadBtn.disabled = false;
+  });
+}
+
+function renderAdminPDFList() {
+  const container = document.getElementById('pdfList');
+  container.innerHTML = '<p style="color:#666; font-style:italic;">⏳ Loading PDFs from cloud...</p>';
+  
+  db.collection('pdfs').orderBy('timestamp', 'desc').get().then((querySnapshot) => {
+    if (querySnapshot.empty) {
+      container.innerHTML = '<p style="color:#666; font-style:italic;">No PDFs uploaded yet.</p>';
+      return;
     }
-  };
-  reader.readAsDataURL(file);
+    let html = '<h4 style="margin-bottom:10px; color:#16a085;">Uploaded PDFs</h4>';
+    querySnapshot.forEach((doc) => {
+      const pdf = doc.data();
+      const id = doc.id;
+      html += `
+        <div class="pdf-item">
+          <div class="pdf-info">
+            <h4>📄 ${pdf.title}</h4>
+            <small>${pdf.subject} | Unit ${pdf.unit} | ${pdf.date}</small>
+          </div>
+          <div class="pdf-actions">
+            <button class="btn btn-sm btn-delete-pdf" onclick="deletePDF('${id}')">🗑️ Delete</button>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }).catch((error) => {
+    container.innerHTML = `<p style="color:#c0392b;">❌ Error loading: ${error.message}</p>`;
+  });
+}
+
+function renderPDFs() {
+  const content = document.getElementById('content');
+  content.innerHTML = '<div class="empty">⏳ Loading PDF resources from cloud...</div>';
+  
+  db.collection('pdfs').orderBy('timestamp', 'desc').get().then((querySnapshot) => {
+    if (querySnapshot.empty) {
+      content.innerHTML = '<div class="empty">📭 No PDF resources uploaded yet. Check back later!</div>';
+      return;
+    }
+    
+    let html = '';
+    querySnapshot.forEach((doc) => {
+      const pdf = doc.data();
+      const id = doc.id;
+      // Escape quotes for inline JS
+      const safeTitle = pdf.title.replace(/'/g, "\\'");
+      
+      html += `
+        <div class="pdf-item">
+          <div class="pdf-info">
+            <h4>📄 ${pdf.title}</h4>
+            <small>Subject: <b>${pdf.subject}</b> | Unit: <b>${pdf.unit}</b> | Added: ${pdf.date}</small>
+          </div>
+          <div class="pdf-actions">
+            <button class="btn btn-sm btn-view-pdf" onclick="viewPDF('${pdf.url}', '${safeTitle}')">👁️ View</button>
+            <button class="btn btn-sm btn-download-pdf" onclick="downloadPDFFile('${pdf.url}', '${safeTitle}')">📥 Download</button>
+            ${isAdminLoggedIn ? `<button class="btn btn-sm btn-delete-pdf" onclick="deletePDF('${id}')">🗑️ Delete</button>` : ''}
+          </div>
+        </div>
+      `;
+    });
+    content.innerHTML = html;
+  }).catch((error) => {
+    console.error("Error getting PDFs: ", error);
+    content.innerHTML = '<div class="empty">❌ Error loading PDFs. Check console & Firebase setup.</div>';
+  });
 }
 
 function deletePDF(id) {
   if (!isAdminLoggedIn) { alert('🔒 Admin login required!'); return; }
   if (!confirm('🗑️ Are you sure you want to delete this PDF? This cannot be undone.')) return;
-  let pdfs = getPDFs();
-  pdfs = pdfs.filter(p => p.id !== id);
-  savePDFs(pdfs);
-  renderAdminPDFList();
-  alert('✅ PDF deleted.');
+  
+  db.collection('pdfs').doc(id).delete().then(() => {
+    alert('✅ PDF deleted.');
+    renderAdminPDFList();
+    if (currentSubject === 'PDFs') renderPDFs();
+  }).catch((error) => {
+    alert('❌ Error deleting PDF: ' + error.message);
+  });
 }
 
-function renderAdminPDFList() {
-  const container = document.getElementById('pdfList');
-  const pdfs = getPDFs();
-  if (pdfs.length === 0) {
-    container.innerHTML = '<p style="color:#666; font-style:italic;">No PDFs uploaded yet.</p>';
-    return;
-  }
-  container.innerHTML = '<h4 style="margin-bottom:10px; color:#16a085;">Uploaded PDFs</h4>' +
-    pdfs.map(pdf => `
-      <div class="pdf-item">
-        <div class="pdf-info">
-          <h4>📄 ${pdf.title}</h4>
-          <small>${pdf.subject} | Unit ${pdf.unit} | ${pdf.date}</small>
-        </div>
-        <div class="pdf-actions">
-          <button class="btn btn-sm btn-delete-pdf" onclick="deletePDF('${pdf.id}')">🗑️ Delete</button>
-        </div>
-      </div>
-    `).join('');
-}
-
-function renderPDFs() {
-  const content = document.getElementById('content');
-  const pdfs = getPDFs();
-  if (pdfs.length === 0) {
-    content.innerHTML = '<div class="empty">📭 No PDF resources uploaded yet. Check back later!</div>';
-    return;
-  }
-  content.innerHTML = pdfs.map(pdf => `
-    <div class="pdf-item">
-      <div class="pdf-info">
-        <h4>📄 ${pdf.title}</h4>
-        <small>Subject: <b>${pdf.subject}</b> | Unit: <b>${pdf.unit}</b> | Added: ${pdf.date}</small>
-      </div>
-      <div class="pdf-actions">
-        <button class="btn btn-sm btn-view-pdf" onclick="viewPDF('${pdf.id}')">👁️ View</button>
-        <button class="btn btn-sm btn-download-pdf" onclick="downloadPDFFile('${pdf.id}')">📥 Download</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function viewPDF(id) {
-  const pdfs = getPDFs();
-  const pdf = pdfs.find(p => p.id === id);
-  if (!pdf) return;
-  document.getElementById('pdfViewerTitle').textContent = pdf.title;
-  document.getElementById('pdfViewerFrame').src = pdf.dataUrl;
+function viewPDF(url, title) {
+  document.getElementById('pdfViewerTitle').textContent = title;
+  document.getElementById('pdfViewerFrame').src = url;
   document.getElementById('pdfModal').classList.add('show');
 }
 
@@ -1910,16 +1965,9 @@ function closePDFModal() {
   document.getElementById('pdfViewerFrame').src = '';
 }
 
-function downloadPDFFile(id) {
-  const pdfs = getPDFs();
-  const pdf = pdfs.find(p => p.id === id);
-  if (!pdf) return;
-  const a = document.createElement('a');
-  a.href = pdf.dataUrl;
-  a.download = pdf.title.replace(/[^a-z0-9]/gi, '_') + '.pdf';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+function downloadPDFFile(url, title) {
+  // Opening in a new tab is the most reliable cross-origin method for Firebase Storage PDFs
+  window.open(url, '_blank');
 }
 
 /* ============ INIT ============ */
