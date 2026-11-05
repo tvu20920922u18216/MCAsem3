@@ -898,7 +898,7 @@ header h1 {
     <p>PDF & PPTX Learning Resources</p></center>
 </header>
 
-<div class="container">
+<div class="container" id="studyMaterialsApp">
 
     <h2>Select Subject</h2>
     <div class="subjects" id="subjects"></div>
@@ -10121,9 +10121,13 @@ renderUnits();
 renderQuestions();
 
 
+(function initStudyMaterials() {
 // ==================================
 // ADD YOUR PDF AND PPTX FILES HERE
 // ==================================
+
+let currentSubject = "AJP";
+let currentUnit = "Unit 1";
 
 const materials = {
 
@@ -10131,7 +10135,6 @@ const materials = {
 
         "Unit 1": {
             pdf: [
-                { name: "Advance Java Programing", url: "" },
                 { name: "orgine of java", url: "files/ajp/java2.pdf" },
                 { name: "java variable", url: "files/ajp/java3.pdf" }
             ],
@@ -10145,13 +10148,12 @@ const materials = {
         "Unit 2": { pdf: [], pptx: [] },
         "Unit 3": { pdf: [], pptx: [] },
         "Unit 4": { pdf: [
-          { name: "Advance Java Programming unit4", url:"xxxxxxxxx"}
         ], pptx: [] },
         "Unit 5": { pdf: [], pptx: [] }
     },
 
 
-    "AMLT": {
+    "AML": {
 
         "Unit 1": {
             pdf: [
@@ -10168,11 +10170,13 @@ const materials = {
         "Unit 4": { pdf: [
            { name: "Machine Learning unit4", url:"MACHINE LEARNING UNIT IV.pdf"}
         ], pptx: [] },
-        "Unit 5": { pdf: [], pptx: [] }
+        "Unit 5": { pdf: [
+          { name: "ML unit-5", url: "UNIT 5 (ML)Traditional and training LSTM.pdf" }
+        ], pptx: [] }
     },
 
 
-    "Web Techniques": {
+    "Web Development": {
 
         "Unit 1": {
             pdf: [
@@ -10376,6 +10380,9 @@ showUnits();
 showMaterials();
 
 
+
+
+})();
 
 </script>
 </body>
